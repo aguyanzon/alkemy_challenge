@@ -30,9 +30,9 @@ logger.addHandler(c_handler)
 
 
 def make_dir(path):
-    '''
-    create directory to store csv files 
-    '''
+    """
+    Create a new folder if it doesn't exist and join it with the working directory 
+    """
     try:
         directory = os.path.join(os.getcwd(), path)
         if not os.path.exists(directory):
@@ -46,6 +46,11 @@ def make_dir(path):
         
 
 def download_data_files():
+    """
+    Download the files through request. It performs a decoding for each of them, 
+    then converts them into a dataframe and finally hosts them as csv files in a new folder 
+    created in conjunction with the make_dir function.
+    """
     for name_file, url in URLS.items():
         with requests.Session() as s:
             
@@ -56,7 +61,7 @@ def download_data_files():
             download = s.get(url)
             logger.info("Downloading {} file".format(url))
 
-            # analyze differents encodings
+            # Evaluate differents encodings
             if download.apparent_encoding == 'ISO-8859-1':
                 decoded_content = download.content.decode('ISO-8859-1')
                 
