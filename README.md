@@ -1,6 +1,11 @@
-# alkemy_challenge 
+# Alkemy Challenge 
+
+This is a data analytics challenge with python to enter the acceleration provided by [Alkemy](https://www.alkemy.org/).
 
 ## Instalations steps
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
+
 ```
 git clone git@github.com:aguyanzon/alkemy_challenge.git
 pip install virtualenv
@@ -11,7 +16,9 @@ pip install -r requirements.txt
 ```
 
 ## Postgresql configuration
-.env file contains the parameters to access the databases changed to your matches your own database config.
+
+The .env file contains the parameters to access the database. Change them to your own database configuration.
 
 ## Configure logging level
-cambiar valores numericos si queres que te printee todo
+
+The .env file contains a parameter named LOG_INFO. Change it to set your own log level value.
