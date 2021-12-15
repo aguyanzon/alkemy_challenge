@@ -73,9 +73,28 @@ def download_data_files():
 
             csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
             df = pd.DataFrame(csv_reader)
-            df.to_csv("{}/{}-{}.csv".format(folder, name_file, datetime.today().strftime('%d-%m-%Y')), index=False)
+            df.to_csv("{}/{}-{}.csv".format(folder, name_file, 
+                                            datetime.today().strftime('%d-%m-%Y')),
+                                            index=False)
+
+
+def read_file_csv(name):
+    """
+    Read csv files and convert them to dataframe
+    """
+    folder = datetime.now().strftime("%Y-%B")
+    file = datetime.today().strftime('%d-%m-%Y')
+    data = pd.read_csv('./{}/{}/{}-{}.csv'.format(name, folder, name, file), header=1)
+        
+    return data
 
 
 
 if __name__ == "__main__":
     download_data_files()
+
+    df_museos = read_file_csv('museos')
+    df_cines = read_file_csv('cines')
+    df_bibliotecas = read_file_csv('bibliotecas')
+
+    print(df_museos)
