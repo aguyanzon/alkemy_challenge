@@ -89,6 +89,51 @@ def read_file_csv(name):
     return data
 
 
+def georef_reverse_geocode(data, fields, params=None, prefix='gr_', step_size=1000):
+    """
+    Function extracted from the API of the argentine geographic data normalization
+    service that allows to normalize and encode the names of territorial units in Argentina.
+    """
+    if not params:
+        params = {}
+        
+    geocoded = pd.DataFrame()
+
+    # Split the input DataFrame into 'step_size' parts of length
+    for i in range(0, len(data), step_size):
+        end = min(len(data), i + step_size)
+        queries = []
+
+        for j in range(i, end):
+            # Each individual 'query' is created (equivalent to making a GET request),
+            # and is added to a query list.
+            query = {
+                'aplanar': True,
+                **params
+            }
+
+            for key, value in fields.items():
+                query[key] = data.iloc[j][value]
+
+            queries.append(query)
+
+        body = {
+            'ubicaciones': queries
+        }
+
+        # The query list is sent using the POST version of the resource / location
+        resp = requests.post('https://apis.datos.gob.ar/georef/api/ubicacion', json=body)
+        resp.raise_for_status()
+        results = resp.json()['resultados']
+
+        # A new DataFrame is created with the results of each query as rows
+        tmp =  pd.DataFrame(result['ubicacion'] for result in results).drop(columns=['lon', 'lat'])
+        geocoded = geocoded.append(tmp)
+
+    geocoded.index = data.index
+    return pd.concat([geocoded.add_prefix(prefix), data], axis='columns')
+
+
 
 if __name__ == "__main__":
     download_data_files()
@@ -96,5 +141,3 @@ if __name__ == "__main__":
     df_museos = read_file_csv('museos')
     df_cines = read_file_csv('cines')
     df_bibliotecas = read_file_csv('bibliotecas')
-
-    print(df_museos)
