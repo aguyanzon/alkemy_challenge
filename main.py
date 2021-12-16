@@ -1,9 +1,10 @@
-import csv
 from datetime import datetime
+import csv
 import json
 import locale
 import logging
 import os
+import time
 
 from decouple import config
 from sqlalchemy import create_engine
@@ -30,9 +31,7 @@ logger.addHandler(c_handler)
 
 
 def make_dir(path):
-    """
-    Create a new folder if it doesn't exist and join it with the working directory 
-    """
+    """Create a new folder if it doesn't exist and join it with the working directory"""
     try:
         directory = os.path.join(os.getcwd(), path)
         if not os.path.exists(directory):
@@ -46,8 +45,7 @@ def make_dir(path):
         
 
 def download_data_files():
-    """
-    Download the files through request. It performs a decoding for each of them, 
+    """Download the files through request. It performs a decoding for each of them, 
     then converts them into a dataframe and finally hosts them as csv files in a new folder 
     created in conjunction with the make_dir function.
     """
@@ -79,9 +77,7 @@ def download_data_files():
 
 
 def read_file_csv(name):
-    """
-    Read csv files and convert them to dataframe
-    """
+    """Read csv files and convert them to dataframe"""
     folder = datetime.now().strftime("%Y-%B")
     file = datetime.today().strftime('%d-%m-%Y')
     data = pd.read_csv('./{}/{}/{}-{}.csv'.format(name, folder, name, file), header=1)
@@ -90,8 +86,7 @@ def read_file_csv(name):
 
 
 def georef_reverse_geocode(data, fields, params=None, prefix='gr_', step_size=1000):
-    """
-    Function extracted from the API of the argentine geographic data normalization
+    """Function extracted from the API of the argentine geographic data normalization
     service that allows to normalize and encode the names of territorial units in Argentina.
     """
     if not params:
@@ -134,10 +129,104 @@ def georef_reverse_geocode(data, fields, params=None, prefix='gr_', step_size=10
     return pd.concat([geocoded.add_prefix(prefix), data], axis='columns')
 
 
+def normalize_and_rename_columns(dataframe):
+    """Normalized and renamed columns of the dataframe using georef_reverse_geocode()
+    and the parameters of latitude and longitude.
+    """
+    if str(dataframe) == str(df_museos):
+        # added category column
+        dataframe['categoría'] = 'Museos'
+
+        # the province column is normalized and the department id 
+        # is obtained through the georef_reverse_geocode()
+        dataframe = georef_reverse_geocode(dataframe, {'lat': 'latitud', 'lon': 'longitud'})
+
+        # rename columns
+        dataframe.drop(['provincia_id', 'provincia', 'gr_departamento_nombre',
+                        'gr_municipio_id', 'gr_municipio_nombre'],
+                        axis=1, inplace=True)
+
+        dataframe.rename(columns= {
+            'localidad_id' : 'cod_localidad',
+            'gr_provincia_nombre' : 'provincia',
+            'gr_provincia_id' : 'id_provincia',
+            'gr_departamento_id' : 'id_departamento',
+            'direccion' : 'domicilio',
+            'codigo_postal' : 'código postal',
+            'telefono' : 'número de teléfono'
+        }, inplace=True)
+
+    elif str(dataframe) == str(df_cines):
+        dataframe = georef_reverse_geocode(dataframe, {'lat': 'Latitud', 'lon': 'Longitud'}) 
+
+        dataframe.drop(['IdProvincia', 'Provincia', 'IdDepartamento',
+                        'gr_municipio_id', 'gr_municipio_nombre',
+                        'gr_departamento_nombre'],
+                        axis=1, inplace=True)
+
+        dataframe.rename(columns= {
+            'Cod_Loc' : 'cod_localidad',
+            'gr_provincia_nombre' : 'provincia',
+            'gr_provincia_id' : 'id_provincia',
+            'gr_departamento_id' : 'id_departamento',
+            'Localidad' : 'localidad',
+            'Dirección' : 'domicilio',
+            'CP' : 'código postal',
+            'Teléfono' : 'número de teléfono',
+            'Categoría' : 'categoría',
+            'Latitud' : 'latitud',
+            'Longitud' : 'longitud',
+            'Observaciones': 'observaciones',
+            'Piso': 'piso',
+            'Pantallas' : 'pantallas',
+            'Butacas' : 'butacas',
+            'espacio_INCAA' : 'espacios INCAA',
+            'Mail' : 'mail',
+            'Web' : 'web',
+            'Nombre' : 'nombre',
+            'Fuente' : 'fuente'
+        }, inplace=True)
+
+    elif str(dataframe) == str(df_bibliotecas):
+        dataframe = georef_reverse_geocode(df_bibliotecas, {'lat': 'Latitud', 'lon': 'Longitud'})
+
+        dataframe.drop(['IdProvincia', 'Provincia', 'IdDepartamento', 'gr_municipio_id',
+                        'gr_municipio_nombre', 'gr_departamento_nombre'],
+                        axis=1, inplace=True)
+
+        dataframe.rename(columns= {
+            'Cod_Loc' : 'cod_localidad',
+            'gr_provincia_nombre' : 'provincia',
+            'gr_provincia_id' : 'id_provincia',
+            'gr_departamento_id' : 'id_departamento',
+            'Domicilio' : 'domicilio',
+            'Localidad' : 'localidad',
+            'CP' : 'código postal',
+            'Teléfono' : 'número de teléfono',
+            'Categoría' : 'categoría',
+            'Observacion' : 'observaciones',
+            'Piso': 'piso',
+            'Mail' : 'mail',
+            'Web' : 'web',
+            'Nombre': 'nombre',
+            'Fuente' : 'fuente'
+        }, inplace=True)
+
+    return dataframe
+
 
 if __name__ == "__main__":
+    start = time.time()
+
     download_data_files()
 
     df_museos = read_file_csv('museos')
     df_cines = read_file_csv('cines')
     df_bibliotecas = read_file_csv('bibliotecas')
+
+    df_museos_norm = normalize_and_rename_columns(df_museos)
+    df_cines_norm = normalize_and_rename_columns(df_cines)
+    df_bibliotecas_norm = normalize_and_rename_columns(df_bibliotecas)
+    
+    end = time.time()
+    print(end-start)
