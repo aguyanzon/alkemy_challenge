@@ -11,7 +11,7 @@ params = {
 }
 
 def create_db():
-    conn = psycopg2.connect(**params)
+    conn = psycopg2.connect(user=params['user'], password=params['password'], host=params["host"])
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     pgcursor = conn.cursor()
     pgcursor.execute('DROP DATABASE IF EXISTS {}'.format(params['db_name']))

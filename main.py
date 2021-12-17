@@ -7,6 +7,7 @@ import os
 import time
 
 from decouple import config
+from numpy import int0
 from sqlalchemy import create_engine
 import pandas as pd
 import psycopg2
@@ -27,12 +28,7 @@ URLS = {
 TODAY = datetime.today()
 
 
-logger = logging.getLogger(__name__)
-c_handler = logging.StreamHandler()
-c_handler.setLevel(config("LOG_LEVEL", cast=int))
-c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-c_handler.setFormatter(c_format)
-logger.addHandler(c_handler)
+logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s', level=config("LOG_LEVEL", cast=int))
 
 
 def make_dir(path):
@@ -41,12 +37,12 @@ def make_dir(path):
         directory = os.path.join(os.getcwd(), path)
         if not os.path.exists(directory):
             os.makedirs(directory)
-            logger.info(f"Directory: {directory} created successfully")
+            logging.info(f"Directory: {directory} created successfully")
         else:
-            logger.info(f"Directory: {directory} already exists")
+            logging.info(f"Directory: {directory} already exists")
             
     except BaseException as error:
-        logger.critical(f"Unexpected {error= }, {type(error)= }")
+        logging.critical(f"Unexpected {error= }, {type(error)= }")
         
 
 def download_data_files():
@@ -62,7 +58,7 @@ def download_data_files():
             make_dir(folder)
             
             download = s.get(url)
-            logger.info("Downloading {} file".format(url))
+            logging.info("Downloading {} file".format(url))
 
             # Evaluate differents encodings
             if download.apparent_encoding == 'ISO-8859-1':
@@ -135,7 +131,8 @@ def georef_reverse_geocode(data, fields, params=None, prefix='gr_', step_size=10
             retries = Retry(
                 total=5, 
                 backoff_factor=0.1, 
-                status_forcelist=[500]
+                status_forcelist=[500],
+                raise_on_status= True   
             )
 
             s.mount('https://', requests.adapters.HTTPAdapter(max_retries=retries))
@@ -161,10 +158,9 @@ def normalize_and_rename_columns(df_dict):
 
     # the province column is normalized and the department id 
     # is obtained through the georef_reverse_geocode()
-    start = time.time()
+ 
     df_dict['df_museos'] = georef_reverse_geocode(df_dict['df_museos'], {'lat': 'latitud', 'lon': 'longitud'})
-    end = time.time()
-    print("Museos", end-start)
+
     # rename columns
     df_dict['df_museos'].drop(['provincia_id', 'provincia', 'gr_departamento_nombre',
                     'gr_municipio_id', 'gr_municipio_nombre'],
@@ -180,10 +176,8 @@ def normalize_and_rename_columns(df_dict):
         'telefono' : 'número de teléfono'
     }, inplace=True)
 
-    start = time.time()
+
     df_dict['df_cines'] = georef_reverse_geocode(df_dict['df_cines'], {'lat': 'Latitud', 'lon': 'Longitud'}) 
-    end = time.time()
-    print("Cines", end-start)
 
     df_dict['df_cines'].drop(['IdProvincia', 'Provincia', 'IdDepartamento',
                     'gr_municipio_id', 'gr_municipio_nombre',
@@ -213,10 +207,8 @@ def normalize_and_rename_columns(df_dict):
         'Fuente' : 'fuente'
     }, inplace=True)
 
-    start = time.time()
+    
     df_dict['df_bibliotecas'] = georef_reverse_geocode(df_dict['df_bibliotecas'], {'lat': 'Latitud', 'lon': 'Longitud'})
-    end = time.time()
-    print("Bibliotecas", end-start)
 
     df_dict['df_bibliotecas'].drop(['IdProvincia', 'Provincia', 'IdDepartamento', 'gr_municipio_id',
                     'gr_municipio_nombre', 'gr_departamento_nombre'],
