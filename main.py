@@ -58,7 +58,7 @@ def download_data_files():
         with requests.Session() as s:
             
             date = TODAY.strftime("%Y-%B")
-            folder = "{}\{}".format(name_file,date)
+            folder = os.path.join(name_file, date)
             make_dir(folder)
             
             download = s.get(url)
