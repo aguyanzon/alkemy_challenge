@@ -13,6 +13,8 @@ import psycopg2
 import requests
 from urllib3.util.retry import Retry
 
+from db_utils import db_setup
+
 
 locale.setlocale(locale.LC_ALL, 'es_ES')
 
@@ -27,7 +29,7 @@ TODAY = datetime.today()
 
 logger = logging.getLogger(__name__)
 c_handler = logging.StreamHandler()
-c_handler.setLevel(config("LOG_INFO", cast=int))
+c_handler.setLevel(config("LOG_LEVEL", cast=int))
 c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 c_handler.setFormatter(c_format)
 logger.addHandler(c_handler)
@@ -39,9 +41,9 @@ def make_dir(path):
         directory = os.path.join(os.getcwd(), path)
         if not os.path.exists(directory):
             os.makedirs(directory)
-            logger.info("Directory: ", directory, "created successfully")
+            logger.info(f"Directory: {directory} created successfully")
         else:
-            logger.info("Directory: ", directory, "already exists")
+            logger.info(f"Directory: {directory} already exists")
             
     except BaseException as error:
         logger.critical(f"Unexpected {error= }, {type(error)= }")
@@ -239,6 +241,8 @@ def normalize_and_rename_columns(df_dict):
     }, inplace=True)
 
 
+
+
 if __name__ == "__main__":
     
     download_data_files()
@@ -254,5 +258,9 @@ if __name__ == "__main__":
     }
     
     normalize_and_rename_columns(df_dict)
+
+    db_setup.create_db()
+
+
     
    
