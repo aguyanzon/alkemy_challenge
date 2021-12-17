@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 import psycopg2
 import requests
+from urllib3.util.retry import Retry
 
 
 locale.setlocale(locale.LC_ALL, 'es_ES')
@@ -20,6 +21,8 @@ URLS = {
     'cines' : 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/392ce1a8-ef11-4776-b280-6f1c7fae16ae/download/cine.csv',
     'bibliotecas' : 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/01c6c048-dbeb-44e0-8efa-6944f73715d7/download/biblioteca_popular.csv'
 }
+
+TODAY = datetime.today()
 
 
 logger = logging.getLogger(__name__)
@@ -52,7 +55,7 @@ def download_data_files():
     for name_file, url in URLS.items():
         with requests.Session() as s:
             
-            date = datetime.now().strftime("%Y-%B")
+            date = TODAY.strftime("%Y-%B")
             folder = "{}\{}".format(name_file,date)
             make_dir(folder)
             
@@ -71,17 +74,26 @@ def download_data_files():
 
             csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
             df = pd.DataFrame(csv_reader)
-            df.to_csv("{}/{}-{}.csv".format(folder, name_file, 
-                                            datetime.today().strftime('%d-%m-%Y')),
-                                            index=False)
+            df.to_csv("{}/{}-{}.csv".format(
+                folder,
+                name_file, 
+                TODAY.strftime('%d-%m-%Y')),
+                index=False
+            )
 
 
 def read_file_csv(name):
     """Read csv files and convert them to dataframe"""
-    folder = datetime.now().strftime("%Y-%B")
-    file = datetime.today().strftime('%d-%m-%Y')
-    data = pd.read_csv('./{}/{}/{}-{}.csv'.format(name, folder, name, file), header=1)
-        
+    folder = TODAY.strftime("%Y-%B")
+    file = TODAY.strftime('%d-%m-%Y')
+    data = pd.read_csv('./{}/{}/{}-{}.csv'.format(
+        name, 
+        folder, 
+        name, 
+        file), 
+        header=1
+    )
+    
     return data
 
 
@@ -117,9 +129,18 @@ def georef_reverse_geocode(data, fields, params=None, prefix='gr_', step_size=10
         }
 
         # The query list is sent using the POST version of the resource / location
-        resp = requests.post('https://apis.datos.gob.ar/georef/api/ubicacion', json=body)
-        resp.raise_for_status()
-        results = resp.json()['resultados']
+        with requests.Session() as s:
+            retries = Retry(
+                total=5, 
+                backoff_factor=0.1, 
+                status_forcelist=[500]
+            )
+
+            s.mount('https://', requests.adapters.HTTPAdapter(max_retries=retries))
+
+            resp = s.post('https://apis.datos.gob.ar/georef/api/ubicacion', json=body)
+            resp.raise_for_status()
+            results = resp.json()['resultados']
 
         # A new DataFrame is created with the results of each query as rows
         tmp =  pd.DataFrame(result['ubicacion'] for result in results).drop(columns=['lon', 'lat'])
@@ -129,104 +150,109 @@ def georef_reverse_geocode(data, fields, params=None, prefix='gr_', step_size=10
     return pd.concat([geocoded.add_prefix(prefix), data], axis='columns')
 
 
-def normalize_and_rename_columns(dataframe):
+def normalize_and_rename_columns(df_dict):
     """Normalized and renamed columns of the dataframe using georef_reverse_geocode()
     and the parameters of latitude and longitude.
     """
-    if str(dataframe) == str(df_museos):
-        # added category column
-        dataframe['categoría'] = 'Museos'
+    # added category column
+    df_dict['df_museos']['categoría'] = 'Museos'
 
-        # the province column is normalized and the department id 
-        # is obtained through the georef_reverse_geocode()
-        dataframe = georef_reverse_geocode(dataframe, {'lat': 'latitud', 'lon': 'longitud'})
+    # the province column is normalized and the department id 
+    # is obtained through the georef_reverse_geocode()
+    start = time.time()
+    df_dict['df_museos'] = georef_reverse_geocode(df_dict['df_museos'], {'lat': 'latitud', 'lon': 'longitud'})
+    end = time.time()
+    print("Museos", end-start)
+    # rename columns
+    df_dict['df_museos'].drop(['provincia_id', 'provincia', 'gr_departamento_nombre',
+                    'gr_municipio_id', 'gr_municipio_nombre'],
+                    axis=1, inplace=True)
 
-        # rename columns
-        dataframe.drop(['provincia_id', 'provincia', 'gr_departamento_nombre',
-                        'gr_municipio_id', 'gr_municipio_nombre'],
-                        axis=1, inplace=True)
+    df_dict['df_museos'].rename(columns= {
+        'localidad_id' : 'cod_localidad',
+        'gr_provincia_nombre' : 'provincia',
+        'gr_provincia_id' : 'id_provincia',
+        'gr_departamento_id' : 'id_departamento',
+        'direccion' : 'domicilio',
+        'codigo_postal' : 'código postal',
+        'telefono' : 'número de teléfono'
+    }, inplace=True)
 
-        dataframe.rename(columns= {
-            'localidad_id' : 'cod_localidad',
-            'gr_provincia_nombre' : 'provincia',
-            'gr_provincia_id' : 'id_provincia',
-            'gr_departamento_id' : 'id_departamento',
-            'direccion' : 'domicilio',
-            'codigo_postal' : 'código postal',
-            'telefono' : 'número de teléfono'
-        }, inplace=True)
+    start = time.time()
+    df_dict['df_cines'] = georef_reverse_geocode(df_dict['df_cines'], {'lat': 'Latitud', 'lon': 'Longitud'}) 
+    end = time.time()
+    print("Cines", end-start)
 
-    elif str(dataframe) == str(df_cines):
-        dataframe = georef_reverse_geocode(dataframe, {'lat': 'Latitud', 'lon': 'Longitud'}) 
+    df_dict['df_cines'].drop(['IdProvincia', 'Provincia', 'IdDepartamento',
+                    'gr_municipio_id', 'gr_municipio_nombre',
+                    'gr_departamento_nombre'],
+                    axis=1, inplace=True)
 
-        dataframe.drop(['IdProvincia', 'Provincia', 'IdDepartamento',
-                        'gr_municipio_id', 'gr_municipio_nombre',
-                        'gr_departamento_nombre'],
-                        axis=1, inplace=True)
+    df_dict['df_cines'].rename(columns= {
+        'Cod_Loc' : 'cod_localidad',
+        'gr_provincia_nombre' : 'provincia',
+        'gr_provincia_id' : 'id_provincia',
+        'gr_departamento_id' : 'id_departamento',
+        'Localidad' : 'localidad',
+        'Dirección' : 'domicilio',
+        'CP' : 'código postal',
+        'Teléfono' : 'número de teléfono',
+        'Categoría' : 'categoría',
+        'Latitud' : 'latitud',
+        'Longitud' : 'longitud',
+        'Observaciones': 'observaciones',
+        'Piso': 'piso',
+        'Pantallas' : 'pantallas',
+        'Butacas' : 'butacas',
+        'espacio_INCAA' : 'espacios INCAA',
+        'Mail' : 'mail',
+        'Web' : 'web',
+        'Nombre' : 'nombre',
+        'Fuente' : 'fuente'
+    }, inplace=True)
 
-        dataframe.rename(columns= {
-            'Cod_Loc' : 'cod_localidad',
-            'gr_provincia_nombre' : 'provincia',
-            'gr_provincia_id' : 'id_provincia',
-            'gr_departamento_id' : 'id_departamento',
-            'Localidad' : 'localidad',
-            'Dirección' : 'domicilio',
-            'CP' : 'código postal',
-            'Teléfono' : 'número de teléfono',
-            'Categoría' : 'categoría',
-            'Latitud' : 'latitud',
-            'Longitud' : 'longitud',
-            'Observaciones': 'observaciones',
-            'Piso': 'piso',
-            'Pantallas' : 'pantallas',
-            'Butacas' : 'butacas',
-            'espacio_INCAA' : 'espacios INCAA',
-            'Mail' : 'mail',
-            'Web' : 'web',
-            'Nombre' : 'nombre',
-            'Fuente' : 'fuente'
-        }, inplace=True)
+    start = time.time()
+    df_dict['df_bibliotecas'] = georef_reverse_geocode(df_dict['df_bibliotecas'], {'lat': 'Latitud', 'lon': 'Longitud'})
+    end = time.time()
+    print("Bibliotecas", end-start)
 
-    elif str(dataframe) == str(df_bibliotecas):
-        dataframe = georef_reverse_geocode(df_bibliotecas, {'lat': 'Latitud', 'lon': 'Longitud'})
+    df_dict['df_bibliotecas'].drop(['IdProvincia', 'Provincia', 'IdDepartamento', 'gr_municipio_id',
+                    'gr_municipio_nombre', 'gr_departamento_nombre'],
+                    axis=1, inplace=True)
 
-        dataframe.drop(['IdProvincia', 'Provincia', 'IdDepartamento', 'gr_municipio_id',
-                        'gr_municipio_nombre', 'gr_departamento_nombre'],
-                        axis=1, inplace=True)
-
-        dataframe.rename(columns= {
-            'Cod_Loc' : 'cod_localidad',
-            'gr_provincia_nombre' : 'provincia',
-            'gr_provincia_id' : 'id_provincia',
-            'gr_departamento_id' : 'id_departamento',
-            'Domicilio' : 'domicilio',
-            'Localidad' : 'localidad',
-            'CP' : 'código postal',
-            'Teléfono' : 'número de teléfono',
-            'Categoría' : 'categoría',
-            'Observacion' : 'observaciones',
-            'Piso': 'piso',
-            'Mail' : 'mail',
-            'Web' : 'web',
-            'Nombre': 'nombre',
-            'Fuente' : 'fuente'
-        }, inplace=True)
-
-    return dataframe
+    df_dict['df_bibliotecas'].rename(columns= {
+        'Cod_Loc' : 'cod_localidad',
+        'gr_provincia_nombre' : 'provincia',
+        'gr_provincia_id' : 'id_provincia',
+        'gr_departamento_id' : 'id_departamento',
+        'Domicilio' : 'domicilio',
+        'Localidad' : 'localidad',
+        'CP' : 'código postal',
+        'Teléfono' : 'número de teléfono',
+        'Categoría' : 'categoría',
+        'Observacion' : 'observaciones',
+        'Piso': 'piso',
+        'Mail' : 'mail',
+        'Web' : 'web',
+        'Nombre': 'nombre',
+        'Fuente' : 'fuente'
+    }, inplace=True)
 
 
 if __name__ == "__main__":
-    start = time.time()
-
+    
     download_data_files()
 
     df_museos = read_file_csv('museos')
     df_cines = read_file_csv('cines')
     df_bibliotecas = read_file_csv('bibliotecas')
 
-    df_museos_norm = normalize_and_rename_columns(df_museos)
-    df_cines_norm = normalize_and_rename_columns(df_cines)
-    df_bibliotecas_norm = normalize_and_rename_columns(df_bibliotecas)
+    df_dict = {
+        'df_museos' : df_museos,
+        'df_cines' : df_cines,
+        'df_bibliotecas' : df_bibliotecas
+    }
     
-    end = time.time()
-    print(end-start)
+    normalize_and_rename_columns(df_dict)
+    
+   
