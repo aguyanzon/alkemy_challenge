@@ -84,11 +84,7 @@ def read_file_csv(name):
     """Read csv files and convert them to dataframe"""
     folder = TODAY.strftime("%Y-%B")
     file = TODAY.strftime('%d-%m-%Y')
-    data = pd.read_csv('./{}/{}/{}-{}.csv'.format(
-        name, 
-        folder, 
-        name, 
-        file), 
+    data = pd.read_csv(f'./{name}/{folder}/{name}-{file}.csv',
         header=1
     )
     
