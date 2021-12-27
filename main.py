@@ -14,6 +14,7 @@ import requests
 from urllib3.util.retry import Retry
 
 from db_utils import db_setup
+from db_utils import create_tables
 
 # to save the folder with the locale language
 locale.setlocale(locale.LC_ALL, 'es_ES')
@@ -247,6 +248,15 @@ if __name__ == "__main__":
     normalize_and_rename_columns(df_dict)
 
     db_setup.create_db()
+
+    tables_sql = {
+        'table1' : 'sql_scripts/table1.sql',
+        'table2' : 'sql_scripts/table2.sql',
+        'table3' : 'sql_scripts/table3.sql'
+    }
+
+    for value in tables_sql.values():
+        create_tables.connect(value)
 
 
     
