@@ -23,7 +23,7 @@ The .env file contains the parameters to access the database. Change them to you
 
 The .env file contains a parameter named LOG_INFO. Change it to set your own log level value.
 
-## Normalization data
+## Data normalization
 
 For the normalization of the data, the API of the Geographic Data Normalization Service extracted from [datos.gob.ar](https://datosgobar.github.io/georef-ar-api/) is used.
 
