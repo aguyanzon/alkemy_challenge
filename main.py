@@ -7,7 +7,6 @@ import os
 import time
 
 from decouple import config
-from numpy import int0
 from sqlalchemy import create_engine
 import pandas as pd
 import psycopg2
@@ -16,8 +15,9 @@ from urllib3.util.retry import Retry
 
 from db_utils import db_setup
 
-
+# to save the folder with the locale language
 locale.setlocale(locale.LC_ALL, 'es_ES')
+
 
 URLS = {
     'museos' : 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/4207def0-2ff7-41d5-9095-d42ae8207a5d/download/museos.csv',
@@ -72,10 +72,8 @@ def download_data_files():
 
             csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
             df = pd.DataFrame(csv_reader)
-            df.to_csv("{}/{}-{}.csv".format(
-                folder,
-                name_file, 
-                TODAY.strftime('%d-%m-%Y')),
+            df.to_csv(
+                f"{folder}/{name_file}-{TODAY.strftime('%d-%m-%Y')}.csv",
                 index=False
             )
 
@@ -84,7 +82,8 @@ def read_file_csv(name):
     """Read csv files and convert them to dataframe"""
     folder = TODAY.strftime("%Y-%B")
     file = TODAY.strftime('%d-%m-%Y')
-    data = pd.read_csv(f'./{name}/{folder}/{name}-{file}.csv',
+    data = pd.read_csv(
+        f"./{name}/{folder}/{name}-{file}.csv",
         header=1
     )
     
