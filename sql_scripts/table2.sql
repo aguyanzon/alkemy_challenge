@@ -1,6 +1,7 @@
 CREATE TABLE table2 (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     provincia TEXT,
-    categoría TEXT,
-    fuente TEXT
+    categoria TEXT,
+    fuente TEXT,
+    "fecha de carga" DATE
 )
