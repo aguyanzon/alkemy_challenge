@@ -1,5 +1,5 @@
 CREATE TABLE table1 (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     cod_localidad INTEGER,
     id_provincia INTEGER,
     id_departamento INTEGER,

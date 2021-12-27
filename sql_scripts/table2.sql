@@ -1,5 +1,5 @@
 CREATE TABLE table2 (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     provincia TEXT,
     categoria TEXT,
     fuente TEXT,

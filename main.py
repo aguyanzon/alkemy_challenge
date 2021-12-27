@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import date
 import csv
 import json
 import locale
@@ -8,6 +9,7 @@ import time
 
 from decouple import config
 from sqlalchemy import create_engine
+import numpy as np
 import pandas as pd
 import psycopg2
 import requests
@@ -15,6 +17,7 @@ from urllib3.util.retry import Retry
 
 from db_utils import db_setup
 from db_utils import create_tables
+from db_utils import insert_values_tables
 
 # to save the folder with the locale language
 locale.setlocale(locale.LC_ALL, 'es_ES')
@@ -150,7 +153,7 @@ def normalize_and_rename_columns(df_dict):
     and the parameters of latitude and longitude.
     """
     # added category column
-    df_dict['df_museos']['categoría'] = 'Museos'
+    df_dict['df_museos']['categoria'] = 'Museos'
 
     # the province column is normalized and the department id 
     # is obtained through the georef_reverse_geocode()
@@ -168,8 +171,8 @@ def normalize_and_rename_columns(df_dict):
         'gr_provincia_id' : 'id_provincia',
         'gr_departamento_id' : 'id_departamento',
         'direccion' : 'domicilio',
-        'codigo_postal' : 'código postal',
-        'telefono' : 'número de teléfono'
+        'codigo_postal' : 'codigo postal',
+        'telefono' : 'numero de telefono'
     }, inplace=True)
 
 
@@ -187,9 +190,9 @@ def normalize_and_rename_columns(df_dict):
         'gr_departamento_id' : 'id_departamento',
         'Localidad' : 'localidad',
         'Dirección' : 'domicilio',
-        'CP' : 'código postal',
-        'Teléfono' : 'número de teléfono',
-        'Categoría' : 'categoría',
+        'CP' : 'codigo postal',
+        'Teléfono' : 'numero de telefono',
+        'Categoría' : 'categoria',
         'Latitud' : 'latitud',
         'Longitud' : 'longitud',
         'Observaciones': 'observaciones',
@@ -217,9 +220,9 @@ def normalize_and_rename_columns(df_dict):
         'gr_departamento_id' : 'id_departamento',
         'Domicilio' : 'domicilio',
         'Localidad' : 'localidad',
-        'CP' : 'código postal',
-        'Teléfono' : 'número de teléfono',
-        'Categoría' : 'categoría',
+        'CP' : 'codigo postal',
+        'Teléfono' : 'numero de telefono',
+        'Categoría' : 'categoria',
         'Observacion' : 'observaciones',
         'Piso': 'piso',
         'Mail' : 'mail',
@@ -257,6 +260,21 @@ if __name__ == "__main__":
 
     for value in tables_sql.values():
         create_tables.connect(value)
+
+    places = pd.concat([df_dict['df_museos'], df_dict['df_cines'], df_dict['df_bibliotecas']])
+    places['id'] = np.arange(1,len(places)+1)
+    places['fecha de carga'] = date.today()
+    places = places[[
+    'id','cod_localidad','id_provincia', 'id_departamento',
+    'categoria', 'provincia', 'localidad', 'nombre', 'domicilio',
+    'codigo postal', 'numero de telefono', 'mail', 'web',
+    'fecha de carga'
+    ]]
+
+    insert_values_tables.using_alchemy(places, 'table1')
+
+
+
 
 
     
