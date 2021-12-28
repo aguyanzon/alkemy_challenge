@@ -1,24 +1,19 @@
 from datetime import datetime
-from datetime import date
 import csv
 import json
 import locale
 import logging
 import os
-import time
 
 from decouple import config
-from sqlalchemy import create_engine
-import numpy as np
 import pandas as pd
 import psycopg2
 import requests
 from urllib3.util.retry import Retry
 
-from db_utils import db_setup
-from db_utils import create_tables
-from db_utils import update_tables
+from db_utils import db_setup, create_tables, tables_update
 from pandas_utils import pd_scripts
+
 
 # to save the folder with the locale language
 locale.setlocale(locale.LC_ALL, 'es_ES')
@@ -29,6 +24,7 @@ URLS = {
     'cines' : 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/392ce1a8-ef11-4776-b280-6f1c7fae16ae/download/cine.csv',
     'bibliotecas' : 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/01c6c048-dbeb-44e0-8efa-6944f73715d7/download/biblioteca_popular.csv'
 }
+
 
 TODAY = datetime.today()
 
@@ -55,11 +51,11 @@ def download_data_files():
     then converts them into a dataframe and finally hosts them as csv files in a new folder 
     created in conjunction with the make_dir function.
     """
-    for name_file, url in URLS.items():
+    for file_name, url in URLS.items():
         with requests.Session() as s:
             
             date = TODAY.strftime("%Y-%B")
-            folder = os.path.join(name_file, date)
+            folder = os.path.join(file_name, date)
             make_dir(folder)
             
             download = s.get(url)
@@ -78,17 +74,17 @@ def download_data_files():
             csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
             df = pd.DataFrame(csv_reader)
             df.to_csv(
-                f"{folder}/{name_file}-{TODAY.strftime('%d-%m-%Y')}.csv",
+                f"{folder}/{file_name}-{TODAY.strftime('%d-%m-%Y')}.csv",
                 index=False
             )
 
 
-def read_file_csv(name):
+def read_file_csv(file_name):
     """Read csv files and convert them to dataframe"""
     folder = TODAY.strftime("%Y-%B")
-    file = TODAY.strftime('%d-%m-%Y')
+    date_today = TODAY.strftime('%d-%m-%Y')
     data = pd.read_csv(
-        f"./{name}/{folder}/{name}-{file}.csv",
+        f"./{file_name}/{folder}/{file_name}-{date_today}.csv",
         header=1
     )
     
@@ -266,9 +262,9 @@ if __name__ == "__main__":
     df_concat = pd.concat([df_dict['df_museos'], df_dict['df_cines'], df_dict['df_bibliotecas']])
     
 
-    update_tables.using_alchemy(pd_scripts.input_table1(df_concat), 'table1')
-    update_tables.using_alchemy(pd_scripts.input_table2(df_concat), 'table2')
-    update_tables.using_alchemy(pd_scripts.input_table3(df_dict["df_cines"]), 'table3')
+    tables_update.using_alchemy(pd_scripts.input_table1(df_concat), 'table1')
+    tables_update.using_alchemy(pd_scripts.input_table2(df_concat), 'table2')
+    tables_update.using_alchemy(pd_scripts.input_table3(df_dict["df_cines"]), 'table3')
 
 
 
