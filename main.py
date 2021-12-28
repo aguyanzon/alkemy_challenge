@@ -17,7 +17,8 @@ from urllib3.util.retry import Retry
 
 from db_utils import db_setup
 from db_utils import create_tables
-from db_utils import insert_values_tables
+from db_utils import update_tables
+from pandas_utils import pd_scripts
 
 # to save the folder with the locale language
 locale.setlocale(locale.LC_ALL, 'es_ES')
@@ -261,17 +262,13 @@ if __name__ == "__main__":
     for value in tables_sql.values():
         create_tables.connect(value)
 
-    places = pd.concat([df_dict['df_museos'], df_dict['df_cines'], df_dict['df_bibliotecas']])
-    places['id'] = np.arange(1,len(places)+1)
-    places['fecha de carga'] = date.today()
-    places = places[[
-    'id','cod_localidad','id_provincia', 'id_departamento',
-    'categoria', 'provincia', 'localidad', 'nombre', 'domicilio',
-    'codigo postal', 'numero de telefono', 'mail', 'web',
-    'fecha de carga'
-    ]]
+    # concat museos, cines and bibliotecas dataframes
+    df_concat = pd.concat([df_dict['df_museos'], df_dict['df_cines'], df_dict['df_bibliotecas']])
+    
 
-    insert_values_tables.using_alchemy(places, 'table1')
+    update_tables.using_alchemy(pd_scripts.input_table1(df_concat), 'table1')
+    update_tables.using_alchemy(pd_scripts.input_table2(df_concat), 'table2')
+    update_tables.using_alchemy(pd_scripts.input_table3(df_dict["df_cines"]), 'table3')
 
 
 
