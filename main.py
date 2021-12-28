@@ -146,7 +146,7 @@ def georef_reverse_geocode(data, fields, params=None, prefix='gr_', step_size=10
 
 
 def normalize_and_rename_columns(df_dict):
-    """Normalized and renamed columns of the dataframe using georef_reverse_geocode()
+    """Normalize and rename dataframe columns using georef_reverse_geocode()
     and the parameters of latitude and longitude.
     """
     # added category column
