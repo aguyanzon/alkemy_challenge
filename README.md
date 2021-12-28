@@ -25,7 +25,7 @@ The .env file contains a parameter named LOG_INFO. Change it to set your own log
 
 ## Data normalization
 
-For the normalization of the data, the API of the Geographic Data Normalization Service extracted from [datos.gob.ar](https://datosgobar.github.io/georef-ar-api/) is used.
+For the normalization of the data, is used the API of the Geographic Data Normalization Service extracted from [datos.gob.ar](https://datosgobar.github.io/georef-ar-api/).
 
 In this project, the latitude and longitude data are used to feed the API and it returns the names of the provinces, and in the case of museums, the id of the different departments.
 
