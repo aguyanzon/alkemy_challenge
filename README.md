@@ -10,7 +10,7 @@ These instructions will get you a copy of the project up and running on your loc
 git clone git@github.com:aguyanzon/alkemy_challenge.git
 pip install virtualenv
 python -m virtualenv env
-env\Scripts\activate for Windows or source env/Scripts/activate for Linux/Mac
+env\Scripts\activate for Windows or source env/bin/activate for Linux/Mac
 pip install -r requirements.txt
 
 ```
