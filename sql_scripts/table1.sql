@@ -1,4 +1,4 @@
-CREATE TABLE table1 (
+CREATE TABLE IF NOT EXISTS table1 (
     id INTEGER PRIMARY KEY,
     cod_localidad INTEGER,
     id_provincia INTEGER,

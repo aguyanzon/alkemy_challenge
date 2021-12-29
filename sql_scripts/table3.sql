@@ -1,4 +1,4 @@
-CREATE TABLE table3 (
+CREATE TABLE IF NOT EXISTS table3 (
     id INTEGER PRIMARY KEY,
     provincia INTEGER,
     pantallas INTEGER,
