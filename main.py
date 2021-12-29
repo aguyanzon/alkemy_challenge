@@ -120,16 +120,17 @@ def georef_reverse_geocode(data, fields, params=None, prefix='gr_', step_size=10
         # The query list is sent using the POST version of the resource / location
         with requests.Session() as s:
             retries = Retry(
-                total=5, 
+                total= None, 
+                status = 5,
                 backoff_factor=0.1, 
                 status_forcelist=[500],
+                allowed_methods= frozenset(['POST']),
                 raise_on_status= True   
             )
 
             s.mount('https://', requests.adapters.HTTPAdapter(max_retries=retries))
 
             resp = s.post('https://apis.datos.gob.ar/georef/api/ubicacion', json=body)
-            resp.raise_for_status()
             results = resp.json()['resultados']
 
         # A new DataFrame is created with the results of each query as rows
