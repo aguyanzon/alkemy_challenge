@@ -29,7 +29,9 @@ URLS = {
 TODAY = datetime.today()
 
 
-logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s', level=config("LOG_LEVEL", cast=int))
+logging.basicConfig(
+    format='%(lineno)s:%(filename)s - %(levelname)s - %(message)s', level=config("LOG_LEVEL", cast=int)
+)
 
 
 def make_dir(path):
@@ -62,14 +64,7 @@ def download_data_files():
             logging.info("Downloading {} file".format(url))
 
             # Evaluate differents encodings
-            if download.apparent_encoding == 'ISO-8859-1':
-                decoded_content = download.content.decode('ISO-8859-1')
-                
-            elif download.apparent_encoding == 'utf-8':
-                decoded_content = download.content.decode('utf-8')
-                
-            else:
-                decoded_content = download.content.decode('latin-1')
+            decoded_content = download.content.decode(download.apparent_encoding)
 
             csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
             df = pd.DataFrame(csv_reader)
