@@ -107,6 +107,12 @@ def normalize_and_rename_columns(df_museos, df_cines, df_bibliotecas):
         'telefono' : 'numero de telefono'
     }, inplace=True)
 
+    # convert columns "id_departamento" and "id_provincia" to int64
+    df_dict['df_museos'] = df_dict['df_museos'].astype({
+        "id_departamento": int,
+        "id_provincia": int
+    })
+
 
     df_dict['df_cines'] = georef_reverse_geocode(df_dict['df_cines'], {'lat': 'Latitud', 'lon': 'Longitud'}) 
 
@@ -138,6 +144,18 @@ def normalize_and_rename_columns(df_museos, df_cines, df_bibliotecas):
         'Fuente' : 'fuente'
     }, inplace=True)
 
+    # convert columns "id_departamento" and "id_provincia" to int64    
+    df_dict['df_cines'] = df_dict['df_cines'].astype({
+        "id_departamento": int,
+        "id_provincia": int
+    })
+
+    # replace values 
+    df_dict['df_cines'].replace({
+        's/d':np.nan,
+        'SI': 'si',
+    }, inplace=True)
+
     
     df_dict['df_bibliotecas'] = georef_reverse_geocode(df_dict['df_bibliotecas'], {'lat': 'Latitud', 'lon': 'Longitud'})
 
@@ -161,6 +179,17 @@ def normalize_and_rename_columns(df_museos, df_cines, df_bibliotecas):
         'Web' : 'web',
         'Nombre': 'nombre',
         'Fuente' : 'fuente'
+    }, inplace=True)
+
+    # convert columns "id_departamento" and "id_provincia" to int64
+    df_dict['df_bibliotecas'] = df_dict['df_bibliotecas'].astype({
+        "id_departamento": int,
+        "id_provincia": int
+    })
+
+    df_dict['df_bibliotecas'].replace({
+        's/d':np.nan,
+        'Sin dirección': np.nan
     }, inplace=True)
 
     return df_dict
