@@ -217,17 +217,15 @@ def input_table2(df):
     df = df[["provincia", "categoria", "fuente"]]
     data = df.groupby(["provincia","categoria", "fuente"]).agg({
         "categoria":"count",
-        "fuente":"count"
         }).rename(
         columns={
-            "categoria":"registros categoria",
-            "fuente": "registros fuente"
+            "categoria":"registros",
         }).reset_index()
 
     data['id'] = np.arange(1,len(data)+1)
     data['fecha de carga'] = date.today()
 
-    data = data[["id", "provincia", "categoria", "fuente", "registros categoria", "registros fuente", "fecha de carga"]] 
+    data = data[["id", "provincia", "categoria", "fuente", "registros", "fecha de carga"]] 
 
     return data
 

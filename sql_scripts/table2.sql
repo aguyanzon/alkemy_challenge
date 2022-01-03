@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS table2 (
     provincia TEXT,
     categoria TEXT,
     fuente TEXT,
-    "registros categoria" INTEGER,
-    "registros fuente" INTEGER,
+    "registros" INTEGER,
     "fecha de carga" DATE
 )
