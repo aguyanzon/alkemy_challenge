@@ -32,7 +32,7 @@ In this project, the latitude and longitude data are used to feed the API and it
 
 Example:
 
-![](https://raw.github.com/aguyanzon/kaggle/master/resources/example.png)
+![](https://raw.github.com/aguyanzon/kaggle/master/resources/example.PNG)
 
 
 
