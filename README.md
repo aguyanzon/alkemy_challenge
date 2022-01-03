@@ -12,7 +12,6 @@ pip install virtualenv
 python -m virtualenv env
 env\Scripts\activate for Windows or source env/bin/activate for Linux/Mac
 pip install -r requirements.txt
-
 ```
 
 ## Postgresql configuration
@@ -33,7 +32,7 @@ In this project, the latitude and longitude data are used to feed the API and it
 
 Example:
 
-![](img/example.PNG)
+![](https://raw.github.com/aguyanzon/kaggle/master/resources/example.png)
 
 
 
