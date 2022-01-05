@@ -1,9 +1,10 @@
-import os
-import logging
-import requests
-from datetime import datetime
 import csv
+from datetime import datetime
+import logging
+import os
+
 import pandas as pd
+import requests
 
 
 URLS = {

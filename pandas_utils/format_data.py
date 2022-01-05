@@ -1,14 +1,16 @@
 from datetime import date, datetime
+
 import numpy as np
 import pandas as pd
 import requests
 from urllib3.util.retry import Retry
 
+
 TODAY = datetime.today()
 
 
 def csv_to_dataframe(file_name):
-    """Read csv files and convert them to dataframe"""
+    """Read csv file and return it as dataframe"""
     folder = TODAY.strftime("%Y-%B")
     date_today = TODAY.strftime('%d-%m-%Y')
     df = pd.read_csv(
@@ -244,4 +246,3 @@ def input_cines(df):
     data = data[["id", "provincia", "pantallas", "butacas", "espacios INCAA", "fecha de carga"]]
 
     return data
-
