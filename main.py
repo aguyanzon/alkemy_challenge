@@ -27,7 +27,7 @@ TODAY = datetime.today()
 
 
 logging.basicConfig(
-    format='%(lineno)s:%(filename)s - %(levelname)s - %(message)s', level=config("LOG_LEVEL", cast=int)
+    format='%(asctime)s: %(levelname)s  [%(filename)s] - %(message)s', level=config("LOG_LEVEL", cast=int)
 )
 
 
