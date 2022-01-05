@@ -2,6 +2,17 @@
 
 This is a data analytics challenge with python to enter the acceleration provided by [Alkemy](https://www.alkemy.org/).
 
+## Description
+
+* The project takes three csv files from [datos.gob.ar](https://datos.gob.ar/dataset/cultura-mapa-cultural-espacios-culturales/) and downloads them through the requests library.
+* The files are saved in a local directory with their respective name and the date the download was made.
+* The data is processed and the information of each one of them is normalized to later create three tables in a Postgresql database.
+* A database is created through the SQLAlchemy library, the connection is made and the tables are created using .sql scripts.
+* After the tables are created, the values ​​are inserted into them through the pandas.to_sql library. In each of the tables a column is added with the date of its upload.
+* These tables are updated every time the project is deployed.
+
+To see the challenge go to the following [link](https://drive.google.com/file/d/1ZxBnjsof8yCZx1JVLVaq5DbRjvIIvfJs/view).
+
 ## Installations steps
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
@@ -26,7 +37,7 @@ The .env file contains a parameter named LOG_LEVEL. Change it to set your own lo
 
 ## Data normalization
 
-For the normalization of the data, is used the API of the Geographic Data Normalization Service extracted from [datos.gob.ar](https://datosgobar.github.io/georef-ar-api/).
+For the normalization of the data, is used the API of the Geographic Data Normalization Service extracted from [datosgobar.github.io/georef-ar-api/](https://datosgobar.github.io/georef-ar-api/).
 
 In this project, the latitude and longitude data are used to feed the API and it returns the names of the provinces, and in the case of museums, the id of the different departments.
 
