@@ -40,7 +40,7 @@ The .env file contains the parameters to access the database. Change them to you
 
 The .env file contains a parameter named LOG_LEVEL. Change it to set your own log level value.
 
-[](https://images.ctfassets.net/h6vh38q7qvzk/4ndCwiSGDeEyIqCwmWs2KK/19a7cbf71d36644167a56f95bc1444c0/loggingLevels.jpeg)
+![](https://images.ctfassets.net/h6vh38q7qvzk/4ndCwiSGDeEyIqCwmWs2KK/19a7cbf71d36644167a56f95bc1444c0/loggingLevels.jpeg)
 
 ## Data normalization
 
