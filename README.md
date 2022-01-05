@@ -4,12 +4,12 @@ This is a data analytics challenge with python to enter the acceleration provide
 
 ## Description
 
-* The project takes three csv files from [datos.gob.ar](https://datos.gob.ar/dataset/cultura-mapa-cultural-espacios-culturales/) and downloads them through the requests library.
+* The project takes three csv files from [datos.gob.ar](https://datos.gob.ar/dataset/cultura-mapa-cultural-espacios-culturales/) and downloads them.
 * The files are saved in a local directory with their respective name and the date the download was made.
 * The data is processed and the information of each one of them is normalized to later create three tables in a Postgresql database.
-* A database is created through the SQLAlchemy library, the connection is made and the tables are created using .sql scripts.
+* A database is created and the tables are created using .sql scripts.
 * After the tables are created, the values ​​are inserted into them through the pandas.to_sql library. In each of the tables a column is added with the date of its upload.
-* These tables are updated every time the project is deployed.
+* These tables are updated every time the project is executed.
 
 To see the challenge go to the following [link](https://drive.google.com/file/d/1ZxBnjsof8yCZx1JVLVaq5DbRjvIIvfJs/view).
 
@@ -25,6 +25,13 @@ env\Scripts\activate for Windows or source env/bin/activate for Linux/Mac
 pip install -r requirements.txt
 ```
 
+## How to run
+In project root directory run:
+
+```
+python main.py 
+```
+
 ## Postgresql configuration
 
 The .env file contains the parameters to access the database. Change them to your own database configuration.
@@ -33,7 +40,7 @@ The .env file contains the parameters to access the database. Change them to you
 
 The .env file contains a parameter named LOG_LEVEL. Change it to set your own log level value.
 
-<img src="https://images.ctfassets.net/h6vh38q7qvzk/4ndCwiSGDeEyIqCwmWs2KK/19a7cbf71d36644167a56f95bc1444c0/loggingLevels.jpeg" alt="Logging levels">
+[](https://images.ctfassets.net/h6vh38q7qvzk/4ndCwiSGDeEyIqCwmWs2KK/19a7cbf71d36644167a56f95bc1444c0/loggingLevels.jpeg)
 
 ## Data normalization
 
