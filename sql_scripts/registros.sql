@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS table2 (
+CREATE TABLE IF NOT EXISTS registros (
     id INTEGER PRIMARY KEY,
     provincia TEXT,
     categoria TEXT,

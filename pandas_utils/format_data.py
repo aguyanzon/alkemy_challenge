@@ -7,7 +7,7 @@ from urllib3.util.retry import Retry
 TODAY = datetime.today()
 
 
-def read_file_csv(file_name):
+def csv_to_dataframe(file_name):
     """Read csv files and convert them to dataframe"""
     folder = TODAY.strftime("%Y-%B")
     date_today = TODAY.strftime('%d-%m-%Y')
@@ -199,7 +199,7 @@ def concat_entities(df_dict):
     return pd.concat([df_dict['df_museos'], df_dict['df_cines'], df_dict['df_bibliotecas']])
 
 
-def input_table1(df):
+def input_espacios_culturales(df):
     df['id'] = np.arange(1,len(df)+1)
     df['fecha de carga'] = date.today()
 
@@ -213,7 +213,7 @@ def input_table1(df):
     return df
 
 
-def input_table2(df):
+def input_registros(df):
     df = df[["provincia", "categoria", "fuente"]]
     data = df.groupby(["provincia","categoria", "fuente"]).agg({
         "categoria":"count",
@@ -230,7 +230,7 @@ def input_table2(df):
     return data
 
 
-def input_table3(df):
+def input_cines(df):
     df = df[["provincia", "pantallas", "butacas", "espacios INCAA"]]
     data = df.groupby("provincia").agg({
         "pantallas": "sum",

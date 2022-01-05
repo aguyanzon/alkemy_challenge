@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS table3 (
+CREATE TABLE IF NOT EXISTS cines (
     id INTEGER PRIMARY KEY,
     provincia INTEGER,
     pantallas INTEGER,
