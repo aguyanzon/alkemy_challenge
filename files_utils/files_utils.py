@@ -5,6 +5,7 @@ import os
 
 import pandas as pd
 import requests
+from urllib3.util.retry import Retry
 
 
 URLS = {
@@ -36,22 +37,37 @@ def download_data_files():
     created in conjunction with the make_dir function.
     """
     for file_name, url in URLS.items():
-        with requests.Session() as s:
-            
-            date = TODAY.strftime("%Y-%B")
-            folder = os.path.join(file_name, date)
-            make_dir(folder)
-            
-            download = s.get(url)
-            logging.info(f"Downloading {file_name}.csv")
+        try:
+            with requests.Session() as s:
+                
+                date = TODAY.strftime("%Y-%B")
+                folder = os.path.join(file_name, date)
+                make_dir(folder)
 
-            # Evaluate differents encodings
-            decoded_content = download.content.decode(download.apparent_encoding)
-            logging.info("Succesful download!")
+                retries = Retry(
+                    total= None, 
+                    status = 5,
+                    backoff_factor=0.1, 
+                    status_forcelist=[400,403,404,500],
+                    allowed_methods= frozenset(['GET']),
+                    raise_on_status= True   
+                )
 
-            csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
-            df = pd.DataFrame(csv_reader)
-            df.to_csv(
-                f"{folder}/{file_name}-{TODAY.strftime('%d-%m-%Y')}.csv",
-                index=False
-            )
+                s.mount('https://', requests.adapters.HTTPAdapter(max_retries=retries))
+                
+                download = s.get(url)
+                logging.info(f"Successful {file_name}.csv download!")
+
+                # Evaluate differents encodings
+                decoded_content = download.content.decode(download.apparent_encoding)
+
+                csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
+                df = pd.DataFrame(csv_reader)
+                df.to_csv(
+                    f"{folder}/{file_name}-{TODAY.strftime('%d-%m-%Y')}.csv",
+                    index=False
+                )
+        except BaseException as error:
+            logging.critical(f"Unexpected {error= }, {type(error)= }")
+            exit()
+
