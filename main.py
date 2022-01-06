@@ -50,4 +50,4 @@ if __name__ == "__main__":
     db_utils.insert_dataframe(format_data.input_cines(df_dict["df_cines"]),
                               'cines')
 
-    logging.info("Information loaded into the database")
+    logging.info("Information loaded into the database successfully!")

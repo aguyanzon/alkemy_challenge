@@ -43,10 +43,11 @@ def download_data_files():
             make_dir(folder)
             
             download = s.get(url)
-            logging.info("Downloading {} file".format(url))
+            logging.info("Downloading {}".format(url))
 
             # Evaluate differents encodings
             decoded_content = download.content.decode(download.apparent_encoding)
+            logging.info("Succesful download!")
 
             csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
             df = pd.DataFrame(csv_reader)

@@ -15,9 +15,9 @@ engine = create_engine(params, pool_size=1)
 def create_db():
     if not database_exists(engine.url):
         create_database(engine.url)
-        logging.info("Database created successfully")
+        logging.info("Database created successfully!")
     else:
-        logging.info("Database already exists")
+        logging.info("Database already exists!")
 
 
 def create_tables():
@@ -25,12 +25,12 @@ def create_tables():
     for file_name in os.listdir(sql_scripts_dir):
         sql_file = open(os.path.join(sql_scripts_dir, file_name), 'r')
         engine.execute(sql_file.read())
-        logging.info(f"{file_name} executed succesfully")
+        logging.info(f"{file_name} executed succesfully!")
 
 
 def insert_dataframe(df, table_name):
     # convert dataframe to sql
     df.to_sql(table_name, con=engine, index=False, if_exists='replace')
     logging.info(
-        f"Data of {table_name} inserted using to_sql()(sqlalchemy) done successfully..."
+        f"Data of {table_name} inserted successfully!"
     )

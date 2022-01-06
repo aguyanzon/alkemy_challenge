@@ -190,7 +190,7 @@ def normalize_and_rename_columns(df_museos, df_cines, df_bibliotecas):
         'Sin dirección': np.nan
     }, inplace=True)
 
-    logging.info("Successful data processing")
+    logging.info("Successful data processing!")
 
     return df_dict
 
