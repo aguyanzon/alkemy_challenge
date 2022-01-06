@@ -43,7 +43,7 @@ def download_data_files():
             make_dir(folder)
             
             download = s.get(url)
-            logging.info("Downloading {}".format(url))
+            logging.info(f"Downloading {file_name}.csv")
 
             # Evaluate differents encodings
             decoded_content = download.content.decode(download.apparent_encoding)
