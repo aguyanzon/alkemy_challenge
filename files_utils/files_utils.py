@@ -9,9 +9,9 @@ from urllib3.util.retry import Retry
 
 
 URLS = {
-    'museos' : 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/4207def0-2ff7-41d5-9095-d42ae8207a5d/download/museos.csv',
-    'cines' : 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/392ce1a8-ef11-4776-b280-6f1c7fae16ae/download/cine.csv',
-    'bibliotecas' : 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/01c6c048-dbeb-44e0-8efa-6944f73715d7/download/biblioteca_popular.csv'
+    "museos" : "https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/4207def0-2ff7-41d5-9095-d42ae8207a5d/download/museos.csv",
+    "cines" : "https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/392ce1a8-ef11-4776-b280-6f1c7fae16ae/download/cine.csv",
+    "bibliotecas" : "https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/01c6c048-dbeb-44e0-8efa-6944f73715d7/download/biblioteca_popular.csv"
 }
 
 TODAY = datetime.today()
@@ -39,7 +39,6 @@ def download_data_files():
     for file_name, url in URLS.items():
         try:
             with requests.Session() as s:
-                
                 date = TODAY.strftime("%Y-%B")
                 folder = os.path.join(file_name, date)
                 make_dir(folder)
@@ -49,19 +48,19 @@ def download_data_files():
                     status = 5,
                     backoff_factor=0.1, 
                     status_forcelist=[400,403,404,500],
-                    allowed_methods= frozenset(['GET']),
+                    allowed_methods= frozenset(["GET"]),
                     raise_on_status= True   
                 )
+                s.mount("https://", requests.adapters.HTTPAdapter(max_retries=retries))
 
-                s.mount('https://', requests.adapters.HTTPAdapter(max_retries=retries))
-                
+                logging.info(f"Downloading {file_name}.csv file")
                 download = s.get(url)
                 logging.info(f"Successful {file_name}.csv download!")
 
                 # Evaluate differents encodings
                 decoded_content = download.content.decode(download.apparent_encoding)
 
-                csv_reader = csv.reader(decoded_content.splitlines(), delimiter=',')
+                csv_reader = csv.reader(decoded_content.splitlines(), delimiter=",")
                 df = pd.DataFrame(csv_reader)
                 df.to_csv(
                     f"{folder}/{file_name}-{TODAY.strftime('%d-%m-%Y')}.csv",
@@ -69,5 +68,4 @@ def download_data_files():
                 )
         except BaseException as error:
             logging.critical(f"Unexpected {error= }, {type(error)= }")
-            exit()
-
+            exit(1)
