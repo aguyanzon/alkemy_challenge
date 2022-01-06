@@ -8,7 +8,7 @@ This is a data analytics challenge with python to enter the acceleration provide
 * The files are saved in a local directory with their respective name and the date the download was made.
 * The data is processed and the information of each one of them is normalized to later create three tables in a Postgresql database.
 * A database is created and the tables are created using .sql scripts.
-* After the tables are created, the values ​​are inserted into them through the pandas.to_sql library. In each of the tables a column is added with the date of its upload.
+* After the tables are created, the values ​​corresponding to each of them are inserted.
 * These tables are updated every time the project is executed.
 
 To see the challenge go to the following [link](https://drive.google.com/file/d/1ZxBnjsof8yCZx1JVLVaq5DbRjvIIvfJs/view).
