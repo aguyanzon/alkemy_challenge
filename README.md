@@ -44,7 +44,7 @@ The .env file contains a parameter named LOG_LEVEL. Change it to set your own lo
 
 ## Data normalization
 
-For the normalization of the data, is used the API of the Geographic Data Normalization Service extracted from [datosgobar.github.io/georef-ar-api/](https://datosgobar.github.io/georef-ar-api/).
+For the normalization of the data an API from the [Argentinian Geographic Data Normalization Service](datosgobar.github.io/georef-ar-api/) is used.
 
 In this project, the latitude and longitude data are used to feed the API and it returns the names of the provinces, and in the case of museums, the id of the different departments.
 
