@@ -30,12 +30,12 @@ if __name__ == "__main__":
 
     '''
     The data is processed and a dictionary is returned with the information
-    of the normalized dataframes.
+    of the normalized dataframes
     '''
     df_dict = format_data.normalize_and_rename_columns(df_museos, df_cines,
                                                        df_bibliotecas)
 
-    '''Database and tables creation.'''
+    '''Database and tables creation'''
     db_utils.create_db()
 
     db_utils.create_tables()
