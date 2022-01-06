@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import logging
 
 import numpy as np
 import pandas as pd
@@ -133,10 +134,6 @@ def normalize_and_rename_columns(df_museos, df_cines, df_bibliotecas):
         'CP' : 'codigo postal',
         'Teléfono' : 'numero de telefono',
         'Categoría' : 'categoria',
-        'Latitud' : 'latitud',
-        'Longitud' : 'longitud',
-        'Observaciones': 'observaciones',
-        'Piso': 'piso',
         'Pantallas' : 'pantallas',
         'Butacas' : 'butacas',
         'espacio_INCAA' : 'espacios INCAA',
@@ -175,8 +172,6 @@ def normalize_and_rename_columns(df_museos, df_cines, df_bibliotecas):
         'CP' : 'codigo postal',
         'Teléfono' : 'numero de telefono',
         'Categoría' : 'categoria',
-        'Observacion' : 'observaciones',
-        'Piso': 'piso',
         'Mail' : 'mail',
         'Web' : 'web',
         'Nombre': 'nombre',
@@ -189,10 +184,13 @@ def normalize_and_rename_columns(df_museos, df_cines, df_bibliotecas):
         "id_provincia": int
     })
 
+    # replace values
     df_dict['df_bibliotecas'].replace({
         's/d':np.nan,
         'Sin dirección': np.nan
     }, inplace=True)
+
+    logging.info("Successful data processing")
 
     return df_dict
 
